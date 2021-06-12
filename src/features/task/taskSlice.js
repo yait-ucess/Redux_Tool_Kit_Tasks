@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
-const apiUrl = "https://localhost:8000/api/tasks/";
+const apiUrl = "http://localhost:8000/api/tasks/";
 const token = localStorage.localJWT;
 
 export const fetchAsyncGet = createAsyncThunk("task/get", async () => {
@@ -14,7 +14,7 @@ export const fetchAsyncGet = createAsyncThunk("task/get", async () => {
 });
 
 export const fetchAsyncCreate = createAsyncThunk("task/post", async (task) => {
-  const res = await axios.post(apiUrl, {
+  const res = await axios.post(apiUrl, task, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `JWT ${token}`,
@@ -54,22 +54,18 @@ const taskSlice = createSlice({
         updated_at: "",
       },
     ],
-    editedTask: [
-      {
-        id: 0,
-        title: "",
-        created_at: "",
-        updated_at: "",
-      },
-    ],
-    selectedTask: [
-      {
-        id: 0,
-        title: "",
-        created_at: "",
-        updated_at: "",
-      },
-    ],
+    editedTask: {
+      id: 0,
+      title: "",
+      created_at: "",
+      updated_at: "",
+    },
+    selectedTask: {
+      id: 0,
+      title: "",
+      created_at: "",
+      updated_at: "",
+    },
   },
   reducers: {
     editTask(state, action) {
@@ -103,16 +99,17 @@ const taskSlice = createSlice({
     });
     builder.addCase(fetchAsyncDelete.fulfilled, (state, action) => {
       return {
+        ...state,
         tasks: state.tasks.filter((t) => t.id !== action.payload),
         selectedTask: { id: 0, title: "", created_at: "", updated_at: "" },
       };
     });
   },
 });
-
-
 export const { editTask, selectTask } = taskSlice.actions;
+
 export const selectSelectedTask = (state) => state.task.selectedTask;
-export const selectEditTask = (state) => state.task.editedTask;
+export const selectEditedTask = (state) => state.task.editedTask;
 export const selectTasks = (state) => state.task.tasks;
+
 export default taskSlice.reducer;
